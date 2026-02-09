@@ -7,6 +7,7 @@ import (
 	"os/signal"
 	"syscall"
 
+	"new-openclaw/internal/admin"
 	"new-openclaw/internal/database"
 	"new-openclaw/internal/handler"
 	"new-openclaw/internal/middleware"
@@ -40,6 +41,9 @@ func main() {
 
 	// 注册路由
 	handler.RegisterRoutes(r)
+
+	// 注册管理后台路由
+	admin.RegisterRoutes(r)
 
 	// 监听退出信号
 	quit := make(chan os.Signal, 1)

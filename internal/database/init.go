@@ -3,6 +3,7 @@ package database
 import (
 	"log"
 
+	"new-openclaw/internal/model"
 	"new-openclaw/pkg/config"
 )
 
@@ -11,6 +12,11 @@ func InitAll(cfg *config.Config) error {
 	// 初始化 MySQL（可选，连接失败只打印警告）
 	if err := InitMySQL(&cfg.MySQL); err != nil {
 		log.Printf("⚠️  MySQL 初始化失败（可选）: %v", err)
+	} else {
+		// 自动迁移数据库表
+		if err := AutoMigrate(); err != nil {
+			log.Printf("⚠️  数据库迁移失败: %v", err)
+		}
 	}
 
 	// 初始化 Redis（可选，连接失败只打印警告）
@@ -38,4 +44,25 @@ func CloseAll() {
 		log.Printf("关闭 MongoDB 失败: %v", err)
 	}
 	log.Println("✅ 所有数据库连接已关闭")
+}
+
+// AutoMigrate 自动迁移数据库表
+func AutoMigrate() error {
+	if MySQL == nil {
+		return nil
+	}
+
+	log.Println("🔄 开始数据库迁移...")
+
+	// 迁移所有模型
+	err := MySQL.AutoMigrate(
+		&model.Admin{},
+	)
+
+	if err != nil {
+		return err
+	}
+
+	log.Println("✅ 数据库迁移完成")
+	return nil
 }
